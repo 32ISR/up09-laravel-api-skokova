@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function register(Request $request): JsonResponse
     {   
         $data = $request->validate([
@@ -28,7 +25,6 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-
         return response()->json([
             'access_token' => $token,
             'user' => $user,
@@ -39,13 +35,34 @@ class AuthController extends Controller
             
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function login()
+    public function login(Request $request): JsonResponse
     {
-        //
-    }
+        $data = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email',$data['email'])->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Неправильный логин или пароль'
+            ],
+            401);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'access_token' => $token,
+            'user' => $user,
+            'token_type' => "Bearer"
+        ], 
+        
+        200);
+        
+        }
+    
 
     /**
      * Store a newly created resource in storage.
