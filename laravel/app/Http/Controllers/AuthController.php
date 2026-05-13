@@ -42,9 +42,9 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email',$data['email'])->first();
+        $user = User::where('email', $data['email'])->first();
 
-        if (!$user) {
+        if (!$user || !Hash::check($data['password'], $user->password)) {
             return response()->json([
                 'message' => 'Неправильный логин или пароль'
             ],
@@ -63,13 +63,11 @@ class AuthController extends Controller
         
         }
     
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
-        //
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(["message" => "Сессия закончена"], 200);
     }
 
     /**
